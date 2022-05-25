@@ -1,7 +1,17 @@
-const { validateUsername, validateUsername, validatePassword } = require('../validators')
+const { User } = require('../models')
+const { ConflictError } = require('../errors')
 
-function createUser(name, username, password, callback) {
+function createUser(name, username, password) {
+    // TODO validate input args
 
+    return User.create({ name, username, password })
+        .then(() => { })
+        .catch(error => {
+            if (error.code = 11000)
+                throw new ConflictError(`user with username ${username} already exists`)
+            
+            throw error
+        })
 }
+
 module.exports = createUser
-//ts1202s7d3 aquí recuerda que no había puesto el callback. En spec hay que usar done() que a su vez es el callback de la función "it"

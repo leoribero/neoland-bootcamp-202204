@@ -10,4 +10,5 @@ function createCustomError(name) {
     return customError
 }
 
+//export default createCustomError ts120527d3
 module.exports = createCustomError
