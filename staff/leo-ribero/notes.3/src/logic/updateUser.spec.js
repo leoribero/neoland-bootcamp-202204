@@ -2,7 +2,7 @@ const { connect, disconnect } = require('mongoose')
 const { User } = require('../models')
 const { ConflictError } = require('../errors')
 const updateUser = require('./updateUser')
-const registerUser = require('./registerUser')
+const createUser = require('./createUser')
 const { expect } = require('chai')
 
 describe('updateUser', () => {
@@ -15,7 +15,7 @@ describe('updateUser', () => {
         return User.create ({name: 'Ramon Mon', username: 'ramonmon', password: '123123123'})
             .then(result => {
                 // result.id // devuekve el id del usuario creado comoo string
-                return updateUser(result.id, "Wednesday251258")
+                return updateUser(result.id, "Hola Venffffffyu")
             })
             .then(result => {
                 expect(result).to.be.undefined
