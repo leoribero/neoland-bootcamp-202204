@@ -3,9 +3,9 @@ const { User, Note } = require('./models');
 
 (async () => {
     try {
-        await connect('mongodb://localhost:27017/notes-db')
+        await connect('mongodb://localhost:27017/notes-db-test')
 
-        const user = new User({ name: 'Pepito Grillo', username: 'pepigri', password: '123123123' })
+        const user = new User({ name: 'Juan Valdez', username: 'juanvaldez', password: '123123123' })
 
         await user.save()
 

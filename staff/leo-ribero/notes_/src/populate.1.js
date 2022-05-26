@@ -4,7 +4,7 @@ const { User, Note } = require('./models')
 connect('mongodb://localhost:27017/notes-db', error => {
     if (error) return console.error(error)
 
-    const user = new User({ name: 'Pepito Grillo', username: 'pepigri', password: '123123123' })
+    const user = new User({ name: 'Juan Valdez', username: 'juanvaldez', password: '123123123' })
 
     user.save() // returns a Promise
         .then(user => {

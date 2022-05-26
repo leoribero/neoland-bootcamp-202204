@@ -1,13 +1,13 @@
 const { User } = require('../models')
+const { NotFoundError } = require('../errors')
 
-function updateUser(id, newName) {
+function updateUser(userId, name, age, email, phone) {
     // TODO validate input args
 
-    return User.updateOne({_id: id}, {$set:{name: newName}})
-    
-        .then(() => { })
-        .catch(error => {
-            if (error) throw new error
+    return User.updateOne({ _id: userId }, { $set: { name, age, email, phone }})
+        .then(result => {
+            if (result.matchedCount === 0)
+                throw new NotFoundError(`user with id ${userId} does not exist`)
         })
 }
 

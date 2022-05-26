@@ -5,6 +5,7 @@ const registerUser = require('./registerUser')
 const { expect } = require('chai')
 
 describe('registerUser', () => {
+    debugger
     before(() => connect('mongodb://localhost:27017/notes-db-test'))
 
     beforeEach(() => User.deleteMany())
