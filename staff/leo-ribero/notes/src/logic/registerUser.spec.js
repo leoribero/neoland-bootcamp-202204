@@ -24,6 +24,7 @@ describe('registerUser', () => {
     })
 
     it('fails when user already exists', () => {
+        // User.create hace dos pasos en uno, instancia y…
         return User.create({ name: 'Wendy Pan', username: 'wendypan', password: '123123123'})
             .then(() => registerUser('Wendy Pan', 'wendypan', '123123123'))
             .catch(error => {
