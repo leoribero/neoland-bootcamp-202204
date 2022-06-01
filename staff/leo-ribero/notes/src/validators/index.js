@@ -39,6 +39,7 @@ function validatePassword(password, explain = 'password') {
 
 function validateUsername(username) {
     validateStringNotEmptyNoSpaces(username, 'username')
+
     if (username.length < 4)
         throw new FormatError('username length is lower than 4')
 }
@@ -67,12 +68,6 @@ function validatePositiveInteger(number, explain = 'number') {
 function validateEmail(email, explain = 'email') {
     if (!EMAIL_REGEX.test(email))
         throw new FormatError(`${explain} is not an email`)
-}
-
-function validateStringNotEmptyNoSpaces(string, explain = 'string') {
-    validateString(string, explain)
-    if (!string.length) throw new FormatError(`${explain} is empty`)
-    if (string.includes(' ')) throw new FormatError(`${explain} has spaces`)
 }
 
 module.exports = {

@@ -4,70 +4,88 @@ const { NotFoundError } = require('../errors')
 const updateNote = require('./updateNote')
 const { expect } = require('chai')
 
-
 describe('updateNote', () => {
     before(() => connect('mongodb://localhost:27017/notes-db-test'))
 
-    beforeEach(() => User.deleteMany())
+    beforeEach(() => Promise.all([User.deleteMany(), Note.deleteMany()]))
 
     describe('when user already exists', () => {
-        let user, note
+        let user
 
-        // CADA beforeEach crea un escenario
-        beforeEach(() => { // antes de que cada uno haga lo que tiene que hacer, creara un usuario nuevo con sus datos
-            user = new User({ name: 'Papa Gayo', username: 'papagayo', password: '123123123' })
+        beforeEach(() => {
+            user = new User({ name: 'Ele Fante', username: 'elefante', password: '123123123' })
 
-            return user.save() //retornamos una promesa (creada cuando creamos al usuario)
-                .then(() => { //dentro de este escenario creado en el beforeEach, es una nueva promes
-                    note = new Note({ user: user.id, text: 'note test update 1' })
-                    return note.save() //retornamos una promesa (creada cuando creamos la nota)
-                })
+            return user.save()
         })
-        
-        it('succeeds on correct user data', () =>
-            updateNote( note.id, user.id, 'note test update 2') // aquí es donde estamos haciend el update
-                .then(result => {
-                    expect(result).to.be.undefined
-                    // esperamos que despues que el update nos responda, el texto sea update 2
 
-                    return Note.findById(note.id)// esperamos la nota con esa id
-                })
-                .then(note => {
-                    // expect(note.user.toString()).to.equal(user._id.toString())
-                    expect(note.user.toString()).to.equal(user.id)
-                    expect(note.text).to.equal('note test update 2')
-                    expect(note.date).to.be.instanceOf(Date)
-                })
-        )
+        describe('when user already has notes', () => {
+            let note1, note2, note3, allNotes
+
+            beforeEach(() => {
+                note1 = new Note({ user: user.id, text: 'note 1' })
+                note2 = new Note({ user: user.id, text: 'note 2' })
+                note3 = new Note({ user: user.id, text: 'note 3' })
+
+                return Promise.all([note1.save(), note2.save(), note3.save()])
+                    .then(notes => allNotes = notes)
+            })
+
+            it('succeeds on correct user data', () =>
+                updateNote(user.id, note2.id, 'new note 2')
+                    .then(result => {
+                        expect(result).to.be.undefined
+
+                        return Note.findById(note2.id)
+                    })
+                    .then(note2 => expect(note2.text).to.equal('new note 2'))
+            )
+        })
+
+        describe('when user has no notes', () => {
+            it('succeeds on correct user data', () => {
+                const unexistingNoteId = new ObjectId().toString()
+
+                return updateNote(user.id, unexistingNoteId, 'new note 2')
+                    .then(() => {
+                        throw new Error('should not reach point')
+                    })
+                    .catch(error => {
+                        expect(error).to.be.instanceOf(NotFoundError)
+                        expect(error.message).to.equal(`note with id ${unexistingNoteId} does not exist`)
+                    })
+            })
+        })
 
         it('fails on incorrect user id', () => {
-            const wrongId = new ObjectId().toString()
+            const wrongUserId = new ObjectId().toString()
+            const unexistingNoteId = new ObjectId().toString()
 
-            return updateNote(note.id, wrongId, 'texto')
-                .then(result => {
+            updateNote(wrongUserId, unexistingNoteId, 'new note 2')
+                .then(() => {
                     throw new Error('should not reach this point')
                 })
                 .catch(error => {
                     expect(error).to.be.instanceOf(NotFoundError)
-                    expect(error.message).to.equal(`user with id ${wrongId} does not exist`)
+                    expect(error.message).to.equal(`user with id ${wrongUserId} does not exist`)
                 })
         })
     })
 
-    // describe('when user does not exist', () => {
-    //     it('fails on unexisting user id', () => {
-    //         const unexistingUserId = new ObjectId().toString()
+    describe('when user does not exist', () => {
+        it('fails on unexisting user id', () => {
+            const unexistingUserId = new ObjectId().toString()
+            const unexistingNoteId = new ObjectId().toString()
 
-    //         return updateNote(unexistingUserId, 'Pepe Gayo', 26, 'pepe@gayo.com', '+34123123123')
-    //             .then(result => {
-    //                 throw new Error('should not reach this point')
-    //             })
-    //             .catch(error => {
-    //                 expect(error).to.be.instanceOf(NotFoundError)
-    //                 expect(error.message).to.equal(`user with id ${unexistingUserId} does not exist`)
-    //             })
-    //     })
-    // })
+            updateNote(unexistingUserId, unexistingNoteId, 'new note 2')
+                .then(() => {
+                    throw new Error('should not reach this point')
+                })
+                .catch(error => {
+                    expect(error).to.be.instanceOf(NotFoundError)
+                    expect(error.message).to.equal(`user with id ${unexistingUserId} does not exist`)
+                })
+        })
+    })
 
     afterEach(() => User.deleteMany())
 

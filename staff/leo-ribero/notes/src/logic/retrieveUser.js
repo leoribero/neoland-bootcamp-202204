@@ -1,11 +1,9 @@
 const { User } = require('../models')
 const { NotFoundError } = require('../errors')
-const { validateStrinNotEmptyNoSpaces} = require('../validators')
+const { validateStringNotEmptyNoSpaces } = require('../validators')
 
 function retrieveUser(userId) {
-        //ME QUEDO AQUÍ 2022/05/26 1135 repicando desde commit: "add api route handlers" 2022/0526 1034. Continuo…
-
-    // validateStrinNotEmptyNoSpaces(userId, 'user id') 
+    validateStringNotEmptyNoSpaces(userId, 'user id')
 
     return User.findById(userId).lean()
         .then(user => { // {_id: ObjectId, name: 'Papa Gayo', username: 'papagayo', password: '123123123', __v: 0}

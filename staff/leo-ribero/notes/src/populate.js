@@ -1,20 +1,49 @@
 const { connect, disconnect } = require('mongoose')
-const { User, Note } = require('./models');
+const { User, Note, Reaction, Comment } = require('./models')
 
-(async () => {
-    try {
-        await connect('mongodb://localhost:27017/notes-db')
+    ; (async () => {
+        try {
+            await connect('mongodb://localhost:27017/notes-db')
 
-        const user = new User({ name: 'Pepito Grillo', username: 'pepigri', password: '123123123' })
+            await Promise.all([User.deleteMany(), Note.deleteMany()])
 
-        await user.save()
+            const pepito = new User({ name: 'Pepito Grillo', username: 'pepigri', password: '123123123' })
+            const wendy = new User({ name: 'Wendy Bread', username: 'wendy', password: '123123123' })
 
-        const note = new Note({ user: user.id, text: 'hola mundo' })
+            await Promise.all([pepito.save(), wendy.save()])
 
-        await note.save()
+            const note = new Note({ user: pepito.id, text: 'hola mundo' })
 
-        await disconnect()
-    } catch (error) {
-        console.error(error)
-    }
-})()
+            await note.save()
+
+            {
+                const reaction = new Reaction({ user: wendy.id, type: Reaction.LOVE })
+
+                note.reactions.push(reaction)
+
+                await note.save()
+            }
+
+            const comment = new Comment({ user: wendy.id, text: 'se escribe "Hola, Mundo!", amigo' })
+
+            note.comments.push(comment) // WARN when pushing an item into an array mongoose does copy the sub-doc into a new object (it does not link / reference it) [1]
+            // note.comments[0] = comment // WARN same here (as [1])
+
+            await note.save()
+
+            {
+                const reaction = new Reaction({ user: pepito.id, type: Reaction.ANGRY })
+
+                // comment.reactions.push(reaction) // WARN!!! it does not work because of [1]
+                // note.markModified('comments') // this doesn't have any effect to solve [1]
+
+                note.comments[0].reactions.push(reaction) // THIS works, accessing the comment through the object-graph starting from the root document
+
+                await note.save()
+            }
+
+            await disconnect()
+        } catch (error) {
+            console.error(error)
+        }
+    })()
